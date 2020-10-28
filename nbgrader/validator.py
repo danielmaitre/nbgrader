@@ -288,6 +288,8 @@ class Validator(LoggingConfigurable):
                 # --ExecutePreprocessor.timeout doesn't work.  Better solution
                 # requested, unknown why this is needed.
                 pp = preprocessor(**self.config[preprocessor.__name__])
+                self.log.info("preprocessor name: '{}'".format(preprocessor.__name__))
+                self.log.info("preprocessor config: '{}'".format(self.config[preprocessor.__name__]))
                 nb, resources = pp.preprocess(nb, resources)
         return nb
 
