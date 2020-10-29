@@ -292,7 +292,7 @@ class Validator(LoggingConfigurable):
                 configs.update(self.config[preprocessor.__name__ + "Preprocessor"])             
                 pp = preprocessor(**configs)
                 self.log.info("preprocessor name: '{}'".format(preprocessor.__name__))
-                self.log.info("preprocessor config: '{}'".format(self.config[preprocessor.__name__]))
+                self.log.info("preprocessor config: '{}'".format(configs))
                 nb, resources = pp.preprocess(nb, resources)
         return nb
 
