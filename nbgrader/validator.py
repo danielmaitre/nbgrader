@@ -282,13 +282,19 @@ class Validator(LoggingConfigurable):
 
     def _preprocess(self, nb: NotebookNode) -> NotebookNode:
         resources = {}
+        self.log.info("config: '{}'".format(self.config))
         with utils.setenv(NBGRADER_VALIDATING='1'):
             for preprocessor in self.preprocessors:
                 # https://github.com/jupyter/nbgrader/pull/1075
                 # It seemes that without the self.config passed below,
                 # --ExecutePreprocessor.timeout doesn't work.  Better solution
                 # requested, unknown why this is needed.
-                pp = preprocessor(**self.config[preprocessor.__name__])
+                configs = {}
+                configs.update(self.config[preprocessor.__name__])
+                configs.update(self.config[preprocessor.__name__ + "Preprocessor"])             
+                pp = preprocessor(**configs)
+                self.log.info("preprocessor name: '{}'".format(preprocessor.__name__))
+                self.log.info("preprocessor config: '{}'".format(configs))
                 nb, resources = pp.preprocess(nb, resources)
         return nb
 

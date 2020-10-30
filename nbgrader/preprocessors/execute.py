@@ -46,7 +46,9 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
             retries = self.execute_retries
 
         try:
+            self.log.warning("preprocess timeout: {}".format(super(Execute, self).timeout))
             output = super(Execute, self).preprocess(nb, resources)
+            
         except RuntimeError:
             if retries == 0:
                 raise UnresponsiveKernelError()
