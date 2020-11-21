@@ -121,6 +121,8 @@ class ExchangeList(ABCExchangeList, Exchange):
                     assignment_dir, 'feedback', info['timestamp'])
                 local_feedback_path = os.path.join(
                     local_feedback_dir, '{0}.html'.format(nb_info['notebook_id']))
+                self.log.debug("local feedback path: {}".format(local_feedback_path))
+                self.log.debug("local feedback dir: {}".format(local_feedback_dir))
                 has_local_feedback = os.path.isfile(local_feedback_path)
                 if has_local_feedback:
                     local_feedback_checksum = _checksum(local_feedback_path)
