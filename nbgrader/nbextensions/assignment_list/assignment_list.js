@@ -470,6 +470,18 @@ define([
 
         } else if (this.data.status == 'submitted') {
             button.text("Fetch Feedback");
+            var has_something_to_fetch = false;
+            for (var isub=0; i<this.data.submissions.length; i++){
+                var sub = this.data.submissions[i];
+                if (sub.has_exchange_feedback && !( sub.has_local_feedback  && !sub.feedback_updated  )) {
+                    has_something_to_fetch = true;
+                    i = this.data.submissions.length;
+                }
+            }
+            if (!has_something_to_fetch){
+                button.attr('disabled', 'disabled');
+            }
+
             button.click(function (e) {
                 var settings = {
                     cache : false,
