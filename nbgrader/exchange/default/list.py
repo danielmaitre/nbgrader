@@ -161,7 +161,7 @@ class ExchangeList(ABCExchangeList, Exchange):
             if info['status'] == 'submitted':
                 if info['notebooks']:
                     has_local_feedback = all([nb['has_local_feedback'] for nb in info['notebooks']])
-                    has_exchange_feedback = all([nb['has_exchange_feedback'] for nb in info['notebooks']])
+                    has_exchange_feedback = any([nb['has_exchange_feedback'] for nb in info['notebooks']])
                     feedback_updated = any([nb['feedback_updated'] for nb in info['notebooks']])
                 else:
                     has_local_feedback = False
