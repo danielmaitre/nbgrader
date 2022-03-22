@@ -138,13 +138,16 @@ class ExchangeList(ABCExchangeList, Exchange):
                 nb_hash = notebook_hash(notebook, unique_key)
                 exchange_feedback_path = os.path.join(
                     self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
+                self.log.debug("Looking for file: {}.html in {}".format(nb_hash, exchange_feedback_path))
                 has_exchange_feedback = os.path.isfile(exchange_feedback_path)
                 if not has_exchange_feedback:
                     # Try looking for legacy feedback.
                     nb_hash = notebook_hash(notebook)
                     exchange_feedback_path = os.path.join(
                         self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
+                    self.log.debug("Looking for file: {}.html in {}".format(nb_hash, exchange_feedback_path))
                     has_exchange_feedback = os.path.isfile(exchange_feedback_path)
+
                 if has_exchange_feedback:
                     exchange_feedback_checksum = _checksum(exchange_feedback_path)
                 else:
