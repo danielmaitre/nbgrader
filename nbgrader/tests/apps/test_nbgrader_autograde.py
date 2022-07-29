@@ -94,6 +94,53 @@ class TestNbGraderAutograde(BaseTestApp):
             assert comment1.comment == None
             assert comment2.comment == None
 
+    def test_showtraceback_exploit(self, db, course_dir):
+        """Can students exploit showtraceback to hide errors from all future cell outputs to receive free points for incorrect cells?"""
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate", "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
+        run_nbgrader(["db", "student", "add", "spam", "--db", db])
+        run_nbgrader(["db", "student", "add", "eggs", "--db", db])
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "submitted-cheat-attempt.ipynb"), join(course_dir, "submitted", "spam", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "submitted-cheat-attempt-alternative.ipynb"), join(course_dir, "submitted", "eggs", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "spam", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "spam", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "eggs", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "eggs", "ps1", "timestamp.txt"))
+
+        with Gradebook(db) as gb:
+            notebook = gb.find_submission_notebook("p1", "ps1", "foo")
+            assert notebook.score == 1
+            assert notebook.max_score == 7
+            assert notebook.needs_manual_grade == False
+
+            notebook = gb.find_submission_notebook("p1", "ps1", "bar")
+            assert notebook.score == 2
+            assert notebook.max_score == 7
+            assert notebook.needs_manual_grade == True
+
+            notebook = gb.find_submission_notebook("p1", "ps1", "spam")
+            assert notebook.score == 1
+            assert notebook.max_score == 7
+            assert notebook.needs_manual_grade == True
+
+            notebook = gb.find_submission_notebook("p1", "ps1", "eggs")
+            assert notebook.score == 1
+            assert notebook.max_score == 7
+            assert notebook.needs_manual_grade == True
+
     def test_student_id_exclude(self, db, course_dir):
         """Does --CourseDirectory.student_id_exclude=X exclude students?"""
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
@@ -647,7 +694,11 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
-        run_nbgrader(["autograde", "ps1"])
+        run_nbgrader(["autograde", "ps1",
+                      "--ClearMetadataPreprocessor.enabled=True",
+                      "--ClearMetadataPreprocessor.clear_notebook_metadata=False",
+                      "--ClearMetadataPreprocessor.preserve_cell_metadata_mask=[('nbgrader')]"
+                      ])
 
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
@@ -704,7 +755,11 @@ class TestNbGraderAutograde(BaseTestApp):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
-        run_nbgrader(["autograde", "ps1"])
+        run_nbgrader(["autograde", "ps1",
+                      "--ClearMetadataPreprocessor.enabled=True",
+                      "--ClearMetadataPreprocessor.clear_notebook_metadata=False",
+                      "--ClearMetadataPreprocessor.preserve_cell_metadata_mask=[('nbgrader')]"
+                      ])
 
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
@@ -1003,3 +1058,21 @@ class TestNbGraderAutograde(BaseTestApp):
             nb1, nb2 = submission.notebooks
             assert not nb2.needs_manual_grade
             assert nb2.score == 0
+
+    def test_grade_with_validating_envvar(self, db, course_dir):
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
+                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+
+        self._copy_file(join("files", "validating-environment-variable.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
+        self._copy_file(join("files", "validating-environment-variable.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+
+        with Gradebook(db) as gb:
+            submission = gb.find_submission("ps1", "foo")
+            nb1, = submission.notebooks
+            assert nb1.score == 0

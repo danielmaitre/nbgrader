@@ -9,7 +9,7 @@ from traitlets.config import LoggingConfigurable, Config, get_config
 from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
-from ..converters import GenerateAssignment, Autograde, GenerateFeedback
+from ..converters import GenerateAssignment, Autograde, GenerateFeedback, GenerateSolution
 from ..exchange import ExchangeFactory, ExchangeError
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
@@ -1064,11 +1064,11 @@ class NbGraderAPI(LoggingConfigurable):
             - log (string): captured log output
 
         """
-        # Because we may be using HTMLExporter.template_file in other
+        # Because we may be using HTMLExporter.template_name in other
         # parts of the the UI, we need to make sure that the template
-        # is explicitply 'feedback.tpl` here:
+        # is explicitply 'feedback` here:
         c = Config()
-        c.HTMLExporter.template_file = 'feedback.tpl'
+        c.HTMLExporter.template_name = 'feedback'
         if student_id is not None:
             with temp_attrs(self.coursedir,
                             assignment_id=assignment_id,

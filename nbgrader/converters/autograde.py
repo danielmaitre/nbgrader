@@ -4,6 +4,8 @@ import shutil
 from textwrap import dedent
 from traitlets import Bool, List, Dict
 
+from nbconvert.preprocessors import ClearMetadataPreprocessor
+
 from .base import BaseConverter, NbGraderException
 from ..preprocessors import (
     AssignLatePenalties, ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades,
@@ -56,14 +58,15 @@ class Autograde(BaseConverter):
         OverwriteKernelspec,
         OverwriteCells,
         CheckCellMetadata
-    ])
+    ]).tag(config=True)
     autograde_preprocessors = List([
         Execute,
+        ClearMetadataPreprocessor,
         LimitOutput,
         SaveAutoGrades,
         AssignLatePenalties,
         CheckCellMetadata
-    ])
+    ]).tag(config=True)
 
     preprocessors = List([])
 
@@ -188,6 +191,7 @@ class Autograde(BaseConverter):
         self._sanitizing = False
         self._init_preprocessors()
         try:
-            super(Autograde, self).convert_single_notebook(notebook_filename)
+            with utils.setenv(NBGRADER_EXECUTION='autograde'):
+                super(Autograde, self).convert_single_notebook(notebook_filename)
         finally:
             self._sanitizing = True

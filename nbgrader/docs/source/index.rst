@@ -17,7 +17,6 @@ For additional resources on using Jupyter in educational contexts, see the `jupy
     :caption: User Documentation
 
     user_guide/highlights
-    user_guide/installation
     user_guide/philosophy
     user_guide/creating_and_grading_assignments
     user_guide/managing_the_database
@@ -30,8 +29,10 @@ For additional resources on using Jupyter in educational contexts, see the `jupy
 
 .. toctree::
     :maxdepth: 1
-    :caption: Configuration
+    :caption: Setup and Configuration
 
+    user_guide/installation
+    user_guide/what_is_nbgrader
     configuration/student_version
     configuration/nbgrader_config
     configuration/config_options
