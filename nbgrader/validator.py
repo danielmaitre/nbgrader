@@ -284,12 +284,7 @@ class Validator(LoggingConfigurable):
 
     def _preprocess(self, nb: NotebookNode) -> NotebookNode:
         resources = {}
-<<<<<<< HEAD
-        self.log.info("config: '{}'".format(self.config))
-        with utils.setenv(NBGRADER_VALIDATING='1'):
-=======
         with utils.setenv(NBGRADER_VALIDATING='1', NBGRADER_EXECUTION='validate'):
->>>>>>> v0.7.1
             for preprocessor in self.preprocessors:
                 # https://github.com/jupyter/nbgrader/pull/1075
                 # It seemes that without the self.config passed below,
