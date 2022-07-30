@@ -41,32 +41,6 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
         """)
     ).tag(config=True)
 
-<<<<<<< HEAD
-    def preprocess(self,
-                   nb: NotebookNode,
-                   resources: ResourcesDict,
-                   retries: Optional[Any] = None
-                   ) -> Tuple[NotebookNode, ResourcesDict]:
-        kernel_name = nb.metadata.get('kernelspec', {}).get('name', 'python')
-        if self.extra_arguments == [] and kernel_name == "python":
-            self.extra_arguments = ["--HistoryManager.hist_file=:memory:"]
-
-        if retries is None:
-            retries = self.execute_retries
-
-        try:
-            self.log.warning("preprocess timeout: {}".format(super(Execute, self).timeout))
-            output = super(Execute, self).preprocess(nb, resources)
-            
-        except RuntimeError:
-            if retries == 0:
-                raise UnresponsiveKernelError()
-            else:
-                self.log.warning("Failed to execute notebook, trying again...")
-                return self.preprocess(nb, resources, retries=retries - 1)
-
-        return output
-=======
     def on_cell_executed(self, **kwargs):
 
         cell = kwargs['cell']
@@ -89,4 +63,3 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
                     error_output.traceback = ["ERROR: An error occurred while"
                                                 " showtraceback was disabled"]
                 cell.outputs.append(error_output)
->>>>>>> v0.7.1
