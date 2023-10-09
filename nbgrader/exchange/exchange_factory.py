@@ -1,7 +1,8 @@
 from traitlets import Type
 from traitlets.config import LoggingConfigurable
 
-from nbgrader.exchange import default, abc
+from nbgrader.exchange import abc
+from nbgrader.exchange import segregated as default
 
 
 class ExchangeFactory(LoggingConfigurable):
