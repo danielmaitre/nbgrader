@@ -46,7 +46,10 @@ class ExchangeList(ABCExchangeList, Exchange):
         m = re.match(regexp, assignment)
         if m is None:
             raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
-        return m.groupdict()
+        ret = m.groupdict()
+        if 'course_id' not in ret.keys():
+            ret['course_id'] = ''
+        return ret
 
     def format_inbound_assignment(self, info):
         msg = "{course_id} {student_id} {assignment_id} {timestamp}".format(**info)
