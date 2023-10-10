@@ -14,9 +14,7 @@ class ExchangeFetchFeedback(Exchange, ABCExchangeFetchFeedback):
         if self.coursedir.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
 
-        self.course_path = os.path.join(self.root, self.coursedir.course_id)
-        self.outbound_path = os.path.join(self.course_path, 'feedback')
-        self.src_path = os.path.join(self.outbound_path)
+        self.src_path = '/srv/nbgrader-feedback'
         self.cache_path = os.path.join(self.cache, self.coursedir.course_id)
 
         if self.coursedir.student_id != '*':
@@ -30,7 +28,7 @@ class ExchangeFetchFeedback(Exchange, ABCExchangeFetchFeedback):
         if not os.path.isdir(self.src_path):
             self._assignment_not_found(
                 self.src_path,
-                os.path.join(self.outbound_path, "*"))
+                os.path.join(self.src_path, "*"))
         if not check_mode(self.src_path, execute=True):
             self.fail("You don't have execute permissions for the directory: {}".format(self.src_path))
 

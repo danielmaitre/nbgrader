@@ -28,7 +28,7 @@ class ExchangeList(ABCExchangeList, Exchange):
         if self.inbound:
             pattern = os.path.join('/srv/nbgrader-inbound', '{}/{}+{}+*'.format(student_id, student_id, assignment_id))
         elif self.cached:
-            pattern = os.path.join(self.cache, course_id, '{}+{}+*'.format(student_id, assignment_id))
+            pattern = os.path.join(self.cache, '{}+{}+*'.format(student_id, assignment_id))
         else:
             #pattern = os.path.join(self.root, course_id, 'outbound', '{}'.format(assignment_id))
             pattern = os.path.join('/srv/nbgrader-outbound', '{}'.format(assignment_id))
