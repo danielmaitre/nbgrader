@@ -68,7 +68,7 @@ class ExchangeReleaseFeedback(Exchange, ABCExchangeReleaseFeedback):
             timestamp = open(os.path.join(feedback_dir, 'timestamp.txt')).read()
             nbfile = os.path.join(submission_dir, "{}.ipynb".format(notebook_id))
             unique_key = make_unique_key(
-                self.coursedir.course_id,
+                '',  # for courses with just one course
                 self.coursedir.assignment_id,
                 notebook_id,
                 student_id,
