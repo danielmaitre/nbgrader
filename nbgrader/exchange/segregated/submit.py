@@ -36,10 +36,10 @@ class ExchangeSubmit(Exchange, ABCExchangeSubmit):
             self._assignment_not_found(self.src_path, os.path.abspath(other_path))
 
     def init_dest(self):
-        if self.coursedir.course_id == '':
-            self.fail("No course id specified. Re-run with --course flag.")
-        if not self.authenticator.has_access(self.coursedir.student_id, self.coursedir.course_id):
-            self.fail("You do not have access to this course.")
+        #if self.coursedir.course_id == '':
+        #    self.fail("No course id specified. Re-run with --course flag.")
+        #if not self.authenticator.has_access(self.coursedir.student_id, self.coursedir.course_id):
+        #    self.fail("You do not have access to this course.")
 
         #self.inbound_path = os.path.join(self.root, self.coursedir.course_id, 'inbound')
         self.inbound_path = '/srv/nbgrader-inbound/'
