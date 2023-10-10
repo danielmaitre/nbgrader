@@ -40,7 +40,7 @@ class ExchangeList(ABCExchangeList, Exchange):
         if self.inbound:
             regexp = r"/srv/nbgrader-inbound/(?P<student_id_2>[^/]*)/(?P<student_id>[^+]*)\+(?P<assignment_id>[^+]*)\+(?P<timestamp>[^+]*)(?P<random_string>\+.*)?"
         elif self.cached:
-            regexp = r"/srv/nbgrader-feedback/(?P<student_id>.*)\+(?P<assignment_id>.*)\+(?P<timestamp>.*)"
+            regexp = r".*/(?P<student_id>.*)\+(?P<assignment_id>.*)\+(?P<timestamp>.*)"
         else:
             regexp = r"/srv/nbgrader-outbound/(?P<assignment_id>.*)"
 
