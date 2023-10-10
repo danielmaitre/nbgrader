@@ -23,13 +23,13 @@ class ExchangeFetchAssignment(Exchange, ABCExchangeFetchAssignment):
         super(ExchangeFetchAssignment, self)._load_config(cfg, **kwargs)
 
     def init_src(self):
-        if self.coursedir.course_id == '':
-            self.fail("No course id specified. Re-run with --course flag.")
-        if not self.authenticator.has_access(self.coursedir.student_id, self.coursedir.course_id):
-            self.fail("You do not have access to this course.")
+        #if self.coursedir.course_id == '':
+        #    self.fail("No course id specified. Re-run with --course flag.")
+        #if not self.authenticator.has_access(self.coursedir.student_id, self.coursedir.course_id):
+        #    self.fail("You do not have access to this course.")
 
-        self.course_path = os.path.join(self.root, self.coursedir.course_id)
-        self.outbound_path = os.path.join(self.course_path, 'outbound')
+        #self.course_path = os.path.join(self.root, self.coursedir.course_id)
+        self.outbound_path = '/srv/nbgrader-outbound'
         self.src_path = os.path.join(self.outbound_path, self.coursedir.assignment_id)
         if not os.path.isdir(self.src_path):
             self._assignment_not_found(
