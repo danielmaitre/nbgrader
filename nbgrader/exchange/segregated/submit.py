@@ -41,7 +41,8 @@ class ExchangeSubmit(Exchange, ABCExchangeSubmit):
         if not self.authenticator.has_access(self.coursedir.student_id, self.coursedir.course_id):
             self.fail("You do not have access to this course.")
 
-        self.inbound_path = os.path.join(self.root, self.coursedir.course_id, 'inbound')
+        #self.inbound_path = os.path.join(self.root, self.coursedir.course_id, 'inbound')
+        self.inbound_path = '/srv/nbgrader-inbound/'
         if not os.path.isdir(self.inbound_path):
             self.fail("Inbound directory doesn't exist: {}".format(self.inbound_path))
         if not check_mode(self.inbound_path, write=True, execute=True):
@@ -67,8 +68,9 @@ class ExchangeSubmit(Exchange, ABCExchangeSubmit):
         if self.coursedir.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
 
-        course_path = os.path.join(self.root, self.coursedir.course_id)
-        outbound_path = os.path.join(course_path, 'outbound')
+        #course_path = os.path.join(self.root, self.coursedir.course_id)
+        #outbound_path = os.path.join(course_path, 'outbound')
+        outbound_path = '/srv/nbgrader-outbound/'
         self.release_path = os.path.join(outbound_path, self.coursedir.assignment_id)
         if not os.path.isdir(self.release_path):
             self.fail("Assignment not found: {}".format(self.release_path))

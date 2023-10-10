@@ -30,7 +30,8 @@ class ExchangeList(ABCExchangeList, Exchange):
         elif self.cached:
             pattern = os.path.join(self.cache, course_id, '{}+{}+*'.format(student_id, assignment_id))
         else:
-            pattern = os.path.join(self.root, course_id, 'outbound', '{}'.format(assignment_id))
+            #pattern = os.path.join(self.root, course_id, 'outbound', '{}'.format(assignment_id))
+            pattern = os.path.join('/srv/nbgrader-outbound', '{}'.format(assignment_id))
 
         self.assignments = sorted(glob.glob(pattern))
 
@@ -40,7 +41,7 @@ class ExchangeList(ABCExchangeList, Exchange):
         elif self.cached:
             regexp = r".*/(?P<course_id>.*)/(?P<student_id>.*)\+(?P<assignment_id>.*)\+(?P<timestamp>.*)"
         else:
-            regexp = r".*/(?P<course_id>.*)/outbound/(?P<assignment_id>.*)"
+            regexp = r"./srv/nbgrader-outbound/(?P<assignment_id>.*)"
 
         m = re.match(regexp, assignment)
         if m is None:
