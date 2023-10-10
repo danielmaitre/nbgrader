@@ -65,8 +65,8 @@ class ExchangeSubmit(Exchange, ABCExchangeSubmit):
                 student_id, self.coursedir.assignment_id, self.timestamp)
 
     def init_release(self):
-        if self.coursedir.course_id == '':
-            self.fail("No course id specified. Re-run with --course flag.")
+        #if self.coursedir.course_id == '':
+        #    self.fail("No course id specified. Re-run with --course flag.")
 
         #course_path = os.path.join(self.root, self.coursedir.course_id)
         #outbound_path = os.path.join(course_path, 'outbound')
