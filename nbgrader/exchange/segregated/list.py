@@ -26,7 +26,7 @@ class ExchangeList(ABCExchangeList, Exchange):
         student_id = self.coursedir.student_id if self.coursedir.student_id else '*'
 
         if self.inbound:
-            pattern = os.path.join(self.root, course_id, 'inbound', '{}+{}+*'.format(student_id, assignment_id))
+            pattern = os.path.join('/srv/nbgrader-inbound', '{}/{}+{}+*'.format(student_id, student_id, assignment_id))
         elif self.cached:
             pattern = os.path.join(self.cache, course_id, '{}+{}+*'.format(student_id, assignment_id))
         else:
@@ -37,7 +37,7 @@ class ExchangeList(ABCExchangeList, Exchange):
 
     def parse_assignment(self, assignment):
         if self.inbound:
-            regexp = r".*/(?P<course_id>.*)/inbound/(?P<student_id>[^+]*)\+(?P<assignment_id>[^+]*)\+(?P<timestamp>[^+]*)(?P<random_string>\+.*)?"
+            regexp = r"/srv/nbgrader-inbound/(?P<student_id_2>[^/]*)/(?P<student_id>[^+]*)\+(?P<assignment_id>[^+]*)\+(?P<timestamp>[^+]*)(?P<random_string>\+.*)?"
         elif self.cached:
             regexp = r".*/(?P<course_id>.*)/(?P<student_id>.*)\+(?P<assignment_id>.*)\+(?P<timestamp>.*)"
         else:
