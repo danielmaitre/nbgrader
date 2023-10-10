@@ -54,7 +54,7 @@ class ExchangeCollect(Exchange, ABCExchangeCollect):
         if not check_mode(self.inbound_path, read=True, execute=True):
             self.fail("You don't have read permissions for the directory: {}".format(self.inbound_path))
         student_id = self.coursedir.student_id if self.coursedir.student_id else '*'
-        pattern = os.path.join(self.inbound_path, '{}+{}+*'.format(student_id, self.coursedir.assignment_id))
+        pattern = os.path.join(self.inbound_path, '{}/{}+{}+*'.format(student_id, student_id, self.coursedir.assignment_id))
         records = [self._path_to_record(f) for f in glob.glob(pattern)]
         usergroups = groupby(records, lambda item: item['username'])
 
