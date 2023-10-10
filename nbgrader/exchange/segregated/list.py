@@ -34,6 +34,7 @@ class ExchangeList(ABCExchangeList, Exchange):
             pattern = os.path.join('/srv/nbgrader-outbound', '{}'.format(assignment_id))
 
         self.assignments = sorted(glob.glob(pattern))
+        self.log.warning("found {} using pattern {}".format(self.assignments, pattern))
 
     def parse_assignment(self, assignment):
         if self.inbound:
