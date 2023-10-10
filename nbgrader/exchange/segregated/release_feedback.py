@@ -76,6 +76,7 @@ class ExchangeReleaseFeedback(Exchange, ABCExchangeReleaseFeedback):
 
             self.log.debug("Unique key is: {}".format(unique_key))
             checksum = notebook_hash(nbfile, unique_key)
+            self.log.debug("checksum is: {}".format(checksum))
             dest = os.path.join(self.dest_path, "{}.html".format(checksum))
 
             self.log.info("Releasing feedback for student '{}' on assignment '{}/{}/{}' ({})".format(
