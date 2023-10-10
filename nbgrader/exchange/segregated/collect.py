@@ -92,7 +92,7 @@ class ExchangeCollect(Exchange, ABCExchangeCollect):
 
         for rec in self.src_records:
             student_id = rec['username']
-            src_path = os.path.join(self.inbound_path, rec['filename'])
+            src_path = os.path.join(self.inbound_path, rec['username'], rec['filename'])
 
             # Cross check the student id with the owner of the submitted directory
             if self.check_owner and pwd is not None: # check disabled under windows
