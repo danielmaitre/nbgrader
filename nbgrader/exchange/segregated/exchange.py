@@ -58,6 +58,16 @@ class Exchange(ABCExchange):
         if not check_directory(self.root, write=True, execute=True):
             self.fail("Unwritable directory, please contact your instructor: {}".format(self.root))
 
+    def ensure_inbound(self):
+        """See if the incoming exchange directory exists and is writable, fail if not."""
+        if not check_directory('/srv/nbgrader-inbound', write=True, execute=True):
+            self.fail("Unwritable directory, please contact your instructor: {}".format(self.root))
+
+    def ensure_outbound(self):
+        """See if the incoming exchange directory exists and is writable, fail if not."""
+        if not check_directory('/srv/nbgrader-outbound', write=False, execute=True):
+            self.fail("Unwritable directory, please contact your instructor: {}".format(self.root))
+
     def init_src(self):
         """Compute and check the source paths for the transfer."""
         raise NotImplementedError
@@ -110,7 +120,8 @@ class Exchange(ABCExchange):
             # This just makes sure that directory is o+rwx.  In group shared
             # case, it is up to admins to ensure that instructors can write
             # there.
-            self.ensure_root()
+            self.ensure_inbound()
+            self.ensure_outbound()
 
         return super(Exchange, self).start()
 
