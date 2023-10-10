@@ -142,14 +142,14 @@ class ExchangeList(ABCExchangeList, Exchange):
                 self.log.debug("Unique key is: {}".format(unique_key))
                 nb_hash = notebook_hash(notebook, unique_key)
                 exchange_feedback_path = os.path.join(
-                    self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
+                    '/srv/nbgrader-feedback', '{0}.html'.format(nb_hash))
                 self.log.debug("Looking for file: {}.html in {}".format(nb_hash, exchange_feedback_path))
                 has_exchange_feedback = os.path.isfile(exchange_feedback_path)
                 if not has_exchange_feedback:
                     # Try looking for legacy feedback.
                     nb_hash = notebook_hash(notebook)
                     exchange_feedback_path = os.path.join(
-                        self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
+                         '/srv/nbgrader-feedback', '{0}.html'.format(nb_hash))
                     self.log.debug("Looking for file: {}.html in {}".format(nb_hash, exchange_feedback_path))
                     has_exchange_feedback = os.path.isfile(exchange_feedback_path)
 
