@@ -50,6 +50,8 @@ class ExchangeList(ABCExchangeList, Exchange):
         ret = m.groupdict()
         if 'course_id' not in ret.keys():
             ret['course_id'] = ''
+        self.log.debug("returned info: {} from path {}".format(ret, assignment))
+
         return ret
 
     def format_inbound_assignment(self, info):
