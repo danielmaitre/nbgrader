@@ -2,7 +2,7 @@ import os
 import shutil
 
 from nbgrader.exchange.abc import ExchangeFetchAssignment as ABCExchangeFetchAssignment
-from nbgrader.exchange.default import Exchange
+from nbgrader.exchange.segregated import Exchange
 from nbgrader.utils import check_mode
 
 

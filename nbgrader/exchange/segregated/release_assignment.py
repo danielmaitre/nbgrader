@@ -9,7 +9,7 @@ from stat import (
 
 
 from nbgrader.exchange.abc import ExchangeReleaseAssignment as ABCExchangeReleaseAssignment
-from nbgrader.exchange.default import Exchange
+from nbgrader.exchange.segregated import Exchange
 
 
 class ExchangeReleaseAssignment(Exchange, ABCExchangeReleaseAssignment):
