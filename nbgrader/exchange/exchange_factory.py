@@ -2,55 +2,55 @@ from traitlets import Type
 from traitlets.config import LoggingConfigurable
 
 from nbgrader.exchange import abc
-from nbgrader.exchange import segregated as default
+from nbgrader.exchange import segregated
 
 
 class ExchangeFactory(LoggingConfigurable):
 
     exchange = Type(
-        default.Exchange,
+        segregated.Exchange,
         klass=abc.Exchange,
         help="A plugin for exchange."
     ).tag(config=True)
 
     fetch_assignment = Type(
-        default.ExchangeFetchAssignment,
+        segregated.ExchangeFetchAssignment,
         klass=abc.ExchangeFetchAssignment,
         help="A plugin for fetching assignments."
     ).tag(config=True)
 
     fetch_feedback = Type(
-        default.ExchangeFetchFeedback,
+        segregated.ExchangeFetchFeedback,
         klass=abc.ExchangeFetchFeedback,
         help="A plugin for fetching feedback."
     ).tag(config=True)
 
     release_assignment = Type(
-        default.ExchangeReleaseAssignment,
+        segregated.ExchangeReleaseAssignment,
         klass=abc.ExchangeReleaseAssignment,
         help="A plugin for releasing assignments."
     ).tag(config=True)
 
     release_feedback = Type(
-        default.ExchangeReleaseFeedback,
+        segregated.ExchangeReleaseFeedback,
         klass=abc.ExchangeReleaseFeedback,
         help="A plugin for releasing feedback."
     ).tag(config=True)
 
     list = Type(
-        default.ExchangeList,
+        segregated.ExchangeList,
         klass=abc.ExchangeList,
         help="A plugin for listing exchange files."
     ).tag(config=True)
 
     submit = Type(
-        default.ExchangeSubmit,
+        segregated.ExchangeSubmit,
         klass=abc.ExchangeSubmit,
         help="A plugin for submitting assignments."
     ).tag(config=True)
 
     collect = Type(
-        default.ExchangeCollect,
+        segregated.ExchangeCollect,
         klass=abc.ExchangeCollect,
         help="A plugin for collecting assignments."
     ).tag(config=True)

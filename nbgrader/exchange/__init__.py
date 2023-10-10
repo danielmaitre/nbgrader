@@ -17,5 +17,5 @@ __all__ = [
     "ExchangeReleaseFeedback",
     "ExchangeSubmit",
     "ExchangeFactory",
-    "default"
+    "segregated"
 ]
