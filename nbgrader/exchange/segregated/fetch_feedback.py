@@ -58,7 +58,7 @@ class ExchangeFetchFeedback(Exchange, ABCExchangeFetchFeedback):
                 # Look for the feedback using new-style of feedback
                 self.log.debug("Unique key is: {}".format(unique_key))
                 nb_hash = notebook_hash(notebook, unique_key)
-                feedbackpath = os.path.join(self.outbound_path, '{0}.html'.format(nb_hash))
+                feedbackpath = os.path.join('/src/nbgrader-feedback/', '{0}.html'.format(nb_hash))
                 if os.path.exists(feedbackpath):
                     self.feedback_files.append((notebook_id, timestamp, feedbackpath))
                     self.log.info(
@@ -68,7 +68,7 @@ class ExchangeFetchFeedback(Exchange, ABCExchangeFetchFeedback):
 
                 # If it doesn't exist, try the legacy hashing
                 nb_hash = notebook_hash(notebook)
-                feedbackpath = os.path.join(self.outbound_path, '{0}.html'.format(nb_hash))
+                feedbackpath = os.path.join('/src/nbgrader-feedback/', '{0}.html'.format(nb_hash))
                 if os.path.exists(feedbackpath):
                     self.feedback_files.append((notebook_id, timestamp, feedbackpath))
                     self.log.warning(
