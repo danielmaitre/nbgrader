@@ -60,6 +60,7 @@ class ExchangeFetchFeedback(Exchange, ABCExchangeFetchFeedback):
                 nb_hash = notebook_hash(notebook, unique_key)
                 self.log.debug("hash is: {}".format(nb_hash))
                 feedbackpath = os.path.join('/src/nbgrader-feedback/', '{0}.html'.format(nb_hash))
+                self.log.debug("looking for file: {}".format(feedbackpath))
                 if os.path.exists(feedbackpath):
                     self.feedback_files.append((notebook_id, timestamp, feedbackpath))
                     self.log.info(
