@@ -11,8 +11,8 @@ from nbgrader.utils import check_mode, notebook_hash, make_unique_key, get_usern
 class ExchangeFetchFeedback(Exchange, ABCExchangeFetchFeedback):
 
     def init_src(self):
-        if self.coursedir.course_id == '':
-            self.fail("No course id specified. Re-run with --course flag.")
+        #if self.coursedir.course_id == '':
+        #    self.fail("No course id specified. Re-run with --course flag.")
 
         self.src_path = '/srv/nbgrader-feedback'
         self.cache_path = os.path.join(self.cache, self.coursedir.course_id)
@@ -49,7 +49,7 @@ class ExchangeFetchFeedback(Exchange, ABCExchangeFetchFeedback):
             for notebook in notebooks:
                 notebook_id = os.path.splitext(os.path.split(notebook)[-1])[0]
                 unique_key = make_unique_key(
-                    self.coursedir.course_id,
+                    '',
                     assignment_id,
                     notebook_id,
                     student_id,
