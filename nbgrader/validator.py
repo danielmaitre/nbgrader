@@ -305,8 +305,7 @@ class Validator(LoggingConfigurable):
         self.log.info("Validating '{}'".format(os.path.abspath(filename)))
         basename = os.path.basename(filename)
         dirname = os.path.dirname(filename)
-        with utils.chdir(dirname):
-            nb = read_nb(basename, as_version=current_nbformat)
+        nb = read_nb(filename, as_version=current_nbformat)
 
         type_changed = self._get_type_changed_cells(nb)
         if len(type_changed) > 0:
