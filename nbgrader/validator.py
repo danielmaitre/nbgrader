@@ -282,8 +282,10 @@ class Validator(LoggingConfigurable):
 
         return passed
 
-    def _preprocess(self, nb: NotebookNode) -> NotebookNode:
+    def _preprocess(self, nb: NotebookNode, input_resources) -> NotebookNode:
         resources = {}
+        resources.update(input_resources)
+
         with utils.setenv(NBGRADER_VALIDATING='1', NBGRADER_EXECUTION='validate'):
             for preprocessor in self.preprocessors:
                 # https://github.com/jupyter/nbgrader/pull/1075
@@ -315,9 +317,8 @@ class Validator(LoggingConfigurable):
                 "new_type": cell.metadata.nbgrader.cell_type
             } for cell in type_changed]
             return results
-
-        with utils.chdir(dirname):
-            nb = self._preprocess(nb)
+        resources = { 'metadata': {'path': dirname }}
+        nb = self._preprocess(nb, resources)
         changed = self._get_changed_cells(nb)
         passed = self._get_passed_cells(nb)
         failed = self._get_failed_cells(nb)
