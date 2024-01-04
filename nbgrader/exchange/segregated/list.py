@@ -30,8 +30,10 @@ class ExchangeList(ABCExchangeList, Exchange):
         elif self.cached:
             pattern = os.path.join(self.cache, '{}+{}+*'.format(student_id, assignment_id))
         else:
-            #pattern = os.path.join(self.root, course_id, 'outbound', '{}'.format(assignment_id))
-            pattern = os.path.join('/srv/nbgrader-outbound', '{}'.format(assignment_id))
+            if self.remove:
+                pattern = os.path.join(self.root, course_id, 'outbound', '{}'.format(assignment_id))
+            else:
+                pattern = os.path.join('/srv/nbgrader-outbound', '{}'.format(assignment_id))
 
         self.assignments = sorted(glob.glob(pattern))
         self.log.warning("found {} using pattern {}".format(self.assignments, pattern))
