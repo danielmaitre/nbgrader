@@ -44,7 +44,10 @@ class ExchangeList(ABCExchangeList, Exchange):
         elif self.cached:
             regexp = r".*/(?P<student_id>.*)\+(?P<assignment_id>.*)\+(?P<timestamp>.*)"
         else:
-            regexp = r"/srv/nbgrader-outbound/(?P<assignment_id>.*)"
+            if self.remove:
+                regexp = r".*/(?P<course_id>.*)/outbound/(?P<assignment_id>.*)"
+            else:
+                regexp = r"/srv/nbgrader-outbound/(?P<assignment_id>.*)"
 
         m = re.match(regexp, assignment)
         if m is None:
