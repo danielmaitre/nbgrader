@@ -1,5 +1,5 @@
 from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
-from traitlets import Bool, List, Integer
+from traitlets import Bool, List, Integer, validate, TraitError
 from textwrap import dedent
 
 from . import NbGraderPreprocessor
@@ -14,10 +14,32 @@ class UnresponsiveKernelError(Exception):
 
 class Execute(NbGraderPreprocessor, ExecutePreprocessor):
 
-    interrupt_on_timeout = Bool(True)
-    allow_errors = Bool(True)
-    raise_on_iopub_timeout = Bool(True)
-    timeout = Integer(600)
+    timeout = Integer(
+        600,
+        help=ExecutePreprocessor.timeout.help,
+        allow_none=True,
+    ).tag(config=True)
+
+    interrupt_on_timeout = Bool(
+        True,
+        help=ExecutePreprocessor.interrupt_on_timeout.help
+    ).tag(config=True)
+
+    allow_errors = Bool(
+        True,
+        help=dedent(
+            """
+            When a cell execution results in an error, continue executing the rest of
+            the notebook. If False, the thrown nbclient exception would break aspects of
+            output rendering.
+            """
+        ),
+    )
+
+    raise_on_iopub_timeout = Bool(
+        True,
+        help=ExecutePreprocessor.raise_on_iopub_timeout.help
+    ).tag(config=True)
 
     error_on_timeout = {
         "ename": "CellTimeoutError",
@@ -42,9 +64,7 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
     ).tag(config=True)
 
     def on_cell_executed(self, **kwargs):
-
         cell = kwargs['cell']
-        cell_index = kwargs['cell_index']
         reply = kwargs['execute_reply']
         if reply['content']['status'] == 'error':
             error_recorded = False
