@@ -6,7 +6,8 @@ from nbconvert.exporters import HTMLExporter
 from traitlets import default
 from tornado import web
 from jinja2 import Environment, FileSystemLoader
-from notebook.utils import url_path_join as ujoin
+from jupyter_server.utils import url_path_join as ujoin
+from jupyter_core.paths import jupyter_config_path
 
 from . import handlers, apihandlers
 from ...apps.baseapp import NbGrader
@@ -16,6 +17,29 @@ class FormgradeExtension(NbGrader):
 
     name = u'formgrade'
     description = u'Grade a notebook using an HTML form'
+
+    @property
+    def root_dir(self):
+        return self._root_dir
+
+    @root_dir.setter
+    def root_dir(self, directory):
+        self._root_dir = directory
+
+    @property
+    def url_prefix(self):
+        self.coursedir._load_config(self.load_config())
+        relpath = os.path.relpath(self.coursedir.root, self.root_dir)
+        return relpath
+
+    def load_config(self):
+        paths = jupyter_config_path()
+        paths.insert(0, os.getcwd())
+        app = NbGrader()
+        app.config_file_paths.append(paths)
+        app.load_config_file()
+
+        return app.config
 
     @default("classes")
     def _classes_default(self):
@@ -33,22 +57,21 @@ class FormgradeExtension(NbGrader):
         # Init jinja environment
         jinja_env = Environment(loader=FileSystemLoader([handlers.template_path]))
 
-        course_dir = self.coursedir.root
-        notebook_dir = self.parent.notebook_dir
-        relpath = os.path.relpath(course_dir, notebook_dir)
+        relpath = self.url_prefix
+
         if relpath.startswith("../"):
             nbgrader_bad_setup = True
             self.log.error(
                 "The course directory root is not a subdirectory of the notebook "
                 "server root. This means that nbgrader will not work correctly. "
                 "If you want to use nbgrader, please ensure the course directory "
-                "root is in a subdirectory of the notebook root: %s", notebook_dir)
+                "root is in a subdirectory of the notebook root: %s", self.root_dir)
         else:
             nbgrader_bad_setup = False
 
         # Configure the formgrader settings
         tornado_settings = dict(
-            nbgrader_url_prefix=os.path.relpath(self.coursedir.root, self.parent.notebook_dir),
+            nbgrader_formgrader=self,
             nbgrader_coursedir=self.coursedir,
             nbgrader_authenticator=self.authenticator,
             nbgrader_exporter=HTMLExporter(config=self.config),
@@ -83,7 +106,18 @@ def load_jupyter_server_extension(nbapp):
     """Load the formgrader extension"""
     nbapp.log.info("Loading the formgrader nbgrader serverextension")
     webapp = nbapp.web_app
+
+    # Save which kind of application is running : Jupyterlab like or classic Notebook
+    webapp.settings['is_jlab'] = not (nbapp.name == 'jupyter-notebook')
+
     formgrader = FormgradeExtension(parent=nbapp)
+
+    # compatibility between notebook.notebookapp.NotebookApp and jupyter_server.serverapp.ServerApp
+    if nbapp.name == 'jupyter-notebook':
+        formgrader.root_dir = nbapp.notebook_dir
+    else:
+        formgrader.root_dir = nbapp.root_dir
+
     formgrader.log = nbapp.log
     formgrader.initialize([])
     formgrader.init_tornado_settings(webapp)

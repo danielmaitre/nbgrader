@@ -3,12 +3,12 @@ import json
 import functools
 
 from tornado import web
-from notebook.base.handlers import IPythonHandler
+from jupyter_server.base.handlers import JupyterHandler
 from ...api import Gradebook
 from ...apps.api import NbGraderAPI
 
 
-class BaseHandler(IPythonHandler):
+class BaseHandler(JupyterHandler):
 
     @property
     def base_url(self):
@@ -16,11 +16,11 @@ class BaseHandler(IPythonHandler):
 
     @property
     def db_url(self):
-        return self.settings['nbgrader_db_url']
+        return self.settings['nbgrader_coursedir'].db_url
 
     @property
     def url_prefix(self):
-        return self.settings['nbgrader_url_prefix']
+        return self.settings['nbgrader_formgrader'].url_prefix
 
     @property
     def coursedir(self):
@@ -50,6 +50,7 @@ class BaseHandler(IPythonHandler):
     @property
     def api(self):
         level = self.log.level
+        self.coursedir.parent.load_config_file()
         api = NbGraderAPI(
             self.coursedir, self.authenticator, parent=self.coursedir.parent)
         api.log_level = level

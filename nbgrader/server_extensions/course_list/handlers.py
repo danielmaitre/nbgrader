@@ -11,8 +11,8 @@ from tornado import gen
 from textwrap import dedent
 from urllib.parse import urlparse
 
-from notebook.utils import url_path_join as ujoin
-from notebook.base.handlers import IPythonHandler
+from jupyter_server.utils import url_path_join as ujoin
+from jupyter_server.base.handlers import JupyterHandler
 from jupyter_core.paths import jupyter_config_path
 
 from ...apps import NbGrader
@@ -31,7 +31,7 @@ def chdir(dirname):
     os.chdir(currdir)
 
 
-class CourseListHandler(IPythonHandler):
+class CourseListHandler(JupyterHandler):
 
     @property
     def assignment_dir(self):
@@ -191,7 +191,7 @@ class CourseListHandler(IPythonHandler):
         raise gen.Return(self.finish(json.dumps(retvalue)))
 
 
-class NbGraderVersionHandler(IPythonHandler):
+class NbGraderVersionHandler(JupyterHandler):
 
     @web.authenticated
     def get(self):
@@ -199,13 +199,13 @@ class NbGraderVersionHandler(IPythonHandler):
         if ui_version != nbgrader_version:
             msg = dedent(
                 """
-                The version of the Course List nbextension does not match
-                the server extension; the nbextension version is {} while the
+                The version of the Course List labextension does not match
+                the server extension; the labextension version is {} while the
                 server version is {}. This can happen if you have recently
                 upgraded nbgrader, and may cause this extension to not work
                 correctly. To fix the problem, please see the nbgrader
                 installation instructions:
-                http://nbgrader.readthedocs.io/en/stable/user_guide/installation.html
+                http://nbgrader.readthedocs.io/en/main/user_guide/installation.html
                 """.format(ui_version, nbgrader_version)
             ).strip().replace("\n", " ")
             self.log.error(msg)
@@ -232,7 +232,13 @@ def load_jupyter_server_extension(nbapp):
     nbapp.log.info("Loading the course_list nbgrader serverextension")
     webapp = nbapp.web_app
     base_url = webapp.settings['base_url']
-    webapp.settings['assignment_dir'] = nbapp.notebook_dir
+
+    # compatibility between notebook.notebookapp.NotebookApp and jupyter_server.serverapp.ServerApp
+    if nbapp.name == 'jupyter-notebook':
+        webapp.settings['assignment_dir'] = nbapp.notebook_dir
+    else:
+        webapp.settings['assignment_dir'] = nbapp.root_dir
+
     webapp.add_handlers(".*$", [
         (ujoin(base_url, pat), handler)
         for pat, handler in default_handlers

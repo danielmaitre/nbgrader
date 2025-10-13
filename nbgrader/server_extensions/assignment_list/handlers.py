@@ -8,8 +8,8 @@ import traceback
 from tornado import web
 from textwrap import dedent
 
-from notebook.utils import url_path_join as ujoin
-from notebook.base.handlers import IPythonHandler
+from jupyter_server.utils import url_path_join as ujoin
+from jupyter_server.base.handlers import JupyterHandler
 from traitlets import Unicode, default
 from traitlets.config import LoggingConfigurable, Config
 from jupyter_core.paths import jupyter_config_path
@@ -34,10 +34,17 @@ def chdir(dirname):
 
 class AssignmentList(LoggingConfigurable):
 
+    @property
+    def root_dir(self):
+        return self._root_dir
+
+    @root_dir.setter
+    def root_dir(self, directory):
+        self._root_dir = directory
+
     def load_config(self):
         paths = jupyter_config_path()
         paths.insert(0, os.getcwd())
-
         app = NbGrader()
         app.config_file_paths.append(paths)
         app.load_config_file()
@@ -46,8 +53,9 @@ class AssignmentList(LoggingConfigurable):
 
     @contextlib.contextmanager
     def get_assignment_dir_config(self):
+
         # first get the exchange assignment directory
-        with chdir(self.parent.notebook_dir):
+        with chdir(self._root_dir):
             config = self.load_config()
 
         lister = ExchangeFactory(config=config).List(config=config)
@@ -96,9 +104,9 @@ class AssignmentList(LoggingConfigurable):
             else:
                 for assignment in assignments:
                     if assignment['status'] == 'fetched':
-                        assignment['path'] = os.path.relpath(assignment['path'], self.parent.notebook_dir)
+                        assignment['path'] = os.path.relpath(assignment['path'], self._root_dir)
                         for notebook in assignment['notebooks']:
-                            notebook['path'] = os.path.relpath(notebook['path'], self.parent.notebook_dir)
+                            notebook['path'] = os.path.relpath(notebook['path'], self._root_dir)
                 retvalue = {
                     "success": True,
                     "value": sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
@@ -269,7 +277,7 @@ class AssignmentList(LoggingConfigurable):
         return retvalue
 
 
-class BaseAssignmentHandler(IPythonHandler):
+class BaseAssignmentHandler(JupyterHandler):
 
     @property
     def manager(self):
@@ -288,22 +296,30 @@ class AssignmentActionHandler(BaseAssignmentHandler):
 
     @web.authenticated
     def post(self, action):
+        try:
+            data = {
+                'assignment_id' : self.get_argument('assignment_id'),
+                'course_id' : self.get_argument('course_id')
+            }
+        except web.MissingArgumentError:
+            data = self.get_json_body()
+
         if action == 'fetch':
-            assignment_id = self.get_argument('assignment_id')
-            course_id = self.get_argument('course_id')
+            assignment_id = data['assignment_id']
+            course_id = data['course_id']
             self.manager.fetch_assignment(course_id, assignment_id)
             self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
         elif action == 'submit':
-            assignment_id = self.get_argument('assignment_id')
-            course_id = self.get_argument('course_id')
+            assignment_id = data['assignment_id']
+            course_id = data['course_id']
             output = self.manager.submit_assignment(course_id, assignment_id)
             if output['success']:
                 self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
             else:
                 self.finish(json.dumps(output))
         elif action == 'fetch_feedback':
-            assignment_id = self.get_argument('assignment_id')
-            course_id = self.get_argument('course_id')
+            assignment_id = data['assignment_id']
+            course_id = data['course_id']
             self.manager.fetch_feedback(course_id, assignment_id)
             self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
 
@@ -323,13 +339,13 @@ class NbGraderVersionHandler(BaseAssignmentHandler):
         if ui_version != nbgrader_version:
             msg = dedent(
                 """
-                The version of the Assignment List nbextension does not match
-                the server extension; the nbextension version is {} while the
+                The version of the Assignment List labextension does not match
+                the server extension; the labextension version is {} while the
                 server version is {}. This can happen if you have recently
                 upgraded nbgrader, and may cause this extension to not work
                 correctly. To fix the problem, please see the nbgrader
                 installation instructions:
-                http://nbgrader.readthedocs.io/en/stable/user_guide/installation.html
+                http://nbgrader.readthedocs.io/en/main/user_guide/installation.html
                 """.format(ui_version, nbgrader_version)
             ).strip().replace("\n", " ")
             self.log.error(msg)
@@ -360,6 +376,13 @@ def load_jupyter_server_extension(nbapp):
     nbapp.log.info("Loading the assignment_list nbgrader serverextension")
     webapp = nbapp.web_app
     webapp.settings['assignment_list_manager'] = AssignmentList(parent=nbapp)
+
+    # compatibility between notebook.notebookapp.NotebookApp and jupyter_server.serverapp.ServerApp
+    if nbapp.name == 'jupyter-notebook':
+        webapp.settings['assignment_list_manager'].root_dir = nbapp.notebook_dir
+    else:
+        webapp.settings['assignment_list_manager'].root_dir = nbapp.root_dir
+
     base_url = webapp.settings['base_url']
     webapp.add_handlers(".*$", [
         (ujoin(base_url, pat), handler)
