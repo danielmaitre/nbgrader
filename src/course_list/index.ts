@@ -80,7 +80,7 @@ class CourseListWidget extends Widget {
     }
 
     checkNbGraderVersion() {
-        let nbgrader_version = '0.8.2';
+        let nbgrader_version = '0.8.3';
         requestAPI<any>('nbgrader_version?version='+nbgrader_version)
             .then(response => {
                 if (!response['success']) {
@@ -123,7 +123,7 @@ export const course_list_extension: JupyterFrontEndPlugin<void> = {
         app.commands.addCommand(command, {
             label: 'Course List',
             execute: () => {
-                if (!widget) {
+                if (!widget || widget.isDisposed) {
                     const content = new CourseListWidget(app);
                     widget = new MainAreaWidget({content});
                     widget.id = 'nbgrader-course-list'

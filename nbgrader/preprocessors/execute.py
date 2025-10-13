@@ -1,10 +1,11 @@
 from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
-from traitlets import Bool, List, Integer, validate, TraitError
+from traitlets import Bool, List, Dict, Integer, validate, TraitError
 from textwrap import dedent
 
 from . import NbGraderPreprocessor
 from nbconvert.exporters.exporter import ResourcesDict
 from nbformat.notebooknode import NotebookNode
+from jupyter_client.manager import AsyncKernelManager
 from typing import Any, Optional, Tuple
 
 
@@ -41,11 +42,15 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
         help=ExecutePreprocessor.raise_on_iopub_timeout.help
     ).tag(config=True)
 
-    error_on_timeout = {
-        "ename": "CellTimeoutError",
-        "evalue": "",
-        "traceback": ["ERROR: No reply from kernel"]
-    }
+    error_on_timeout = Dict(
+        default_value={
+            "ename": "CellTimeoutError",
+            "evalue": "",
+            # ANSI red color around error name
+            "traceback": ["\x1b[0;31mCellTimeoutError\x1b[0m: No reply from kernel before timeout"]
+        },
+        help=ExecutePreprocessor.error_on_timeout.help,
+    ).tag(config=True)
 
     extra_arguments = List([], help=dedent(
         """
@@ -63,18 +68,22 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
         """)
     ).tag(config=True)
 
+    def __init__(self, *args, **kwargs):
+        # nbconvert < 7.3.1 used the sync version of this, which doesn't work for us.
+        kwargs.setdefault('kernel_manager_class', AsyncKernelManager)
+        super().__init__(*args, **kwargs)
+
     def on_cell_executed(self, **kwargs):
         cell = kwargs['cell']
         reply = kwargs['execute_reply']
         if reply['content']['status'] == 'error':
             error_recorded = False
             for output in cell.outputs:
-                if output.output_type == 'error':
+                # If reply ename matches to an output, then they are (probably) the same error
+                if output.output_type == 'error' and output.ename == reply["content"]["ename"]:
                     error_recorded = True
             if not error_recorded:
-                # Occurs when
-                # IPython.core.interactiveshell.InteractiveShell.showtraceback
-                # = lambda *args, **kwargs : None
+                # If enames don't match (i.e. when there is a timeout), then append reply error, so it will be printed
                 error_output = NotebookNode(output_type='error')
                 error_output.ename = reply['content']['ename']
                 error_output.evalue = reply['content']['evalue']

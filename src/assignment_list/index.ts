@@ -150,7 +150,7 @@ class AssignmentListWidget extends Widget {
   checkNbGraderVersion() {
     var warning = this.node.getElementsByClassName('version_error')[0] as HTMLDivElement;
     warning.hidden=false;
-    requestAPI<any>('nbgrader_version?version='+"0.8.2")
+    requestAPI<any>('nbgrader_version?version='+"0.8.3")
     .then(response => {
         if (!response['success']) {
           warning.innerText = response['message'];
@@ -192,7 +192,7 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(command,{
       label: 'Assignment List',
       execute: () => {
-        if(!widget){
+        if(!widget || widget.isDisposed){
           const content = new AssignmentListWidget(app);
           widget = new MainAreaWidget({content});
           widget.id = 'nbgrader-assignment-list';

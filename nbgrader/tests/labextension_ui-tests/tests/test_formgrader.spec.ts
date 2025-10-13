@@ -197,18 +197,33 @@ test('Open assignment list tab from menu', async({
   page
   }) => {
 
-    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(1);
+    const nbgrader_menu = page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")');
+    const formgrader_menu = page.locator('#jp-mainmenu-nbgrader-menu li[data-command="nbgrader:open-formgrader"]');
+    const tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
+    const lastTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
+
+    await expect(tabs).toHaveCount(1);
+
     // Check main menu exists
-    await expect(page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")')).toHaveCount(1);
-    await page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")').click();
+    await expect(nbgrader_menu).toHaveCount(1);
 
-    await page.locator('#jp-mainmenu-nbgrader-menu li[data-command="nbgrader:open-formgrader"]').click();
+    // Open course list from the menu
+    await nbgrader_menu.click();    
+    await formgrader_menu.click();
 
-    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(2);
+    await expect(tabs).toHaveCount(2);        
+    await expect(lastTab_label).toHaveText("Formgrader");
 
-    var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
-    var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
-    await expect(newTab_label).toHaveText("Formgrader");
+    // Close the last tab
+    await tabs.last().locator(".jp-icon-hover.lm-TabBar-tabCloseIcon").click();
+    await expect(tabs).toHaveCount(1);
+
+    // Open again
+    await nbgrader_menu.click();
+    await formgrader_menu.click();
+
+    await expect(tabs).toHaveCount(2);
+    await expect(lastTab_label).toHaveText("Formgrader");
 
 });
 
@@ -492,6 +507,55 @@ test('Gradebook3 show hide names', async ({
   await expect(col2).toHaveText(/Submission #[1-2]/, {useInnerText: true});
   await expect(hidden).toBeVisible();
   await expect(shown).toBeHidden();
+
+});
+
+/*
+  Toggle name visibility button
+ */
+test('Gradebook toggle names button', async ({
+  page,
+  baseURL,
+  tmpPath
+}) => {
+
+  test.skip(is_windows, 'This test does not work on Windows');
+
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
+  // create environment
+  await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
+  await add_courses(page, baseURL, tmpPath);
+  await open_formgrader(page);
+
+  // get formgrader iframe
+  const iframe = page.mainFrame().childFrames()[0];
+
+  // Change iframe URL to gradebook Problem Set 1
+  await iframe.goto(`${baseURL}/formgrader/gradebook/Problem Set 1/Problem 1`);
+  await check_formgrader_breadcrumbs(iframe, ["Manual Grading", "Problem Set 1", "Problem 1"]);
+
+  const button = iframe.locator("[id='toggle_names']").first()
+  const hidden = iframe.locator("td .glyphicon.name-hidden").first();
+  const shown = iframe.locator("td .glyphicon.name-shown").first();
+
+  // At the start, all names are hidden
+  await expect(button).toHaveText("Show All Names", {useInnerText: true});
+  await expect(hidden).toBeVisible();
+  await expect(shown).toBeHidden();
+
+  // Clicking should make names shown
+  await button.click();
+  await expect(button).toHaveText("Hide All Names", {useInnerText: true});
+  await expect(hidden).toBeHidden();
+  await expect(shown).toBeVisible();
+
+  // If there is at least one hidden, button should default to showing all names
+  await shown.click();
+  await expect(button).toHaveText("Show All Names", {useInnerText: true});
+  await button.click();
+  await expect(hidden).toBeHidden();
+  await expect(shown).toBeVisible();
 
 });
 
